@@ -18,9 +18,13 @@ init_t tokenize(char *line) {
 	char *delim = "=";
 
 	
-	strcpy(key, strtok(line, delim));
-	strcpy(value, strtok(NULL, delim));
-	
+	strncpy(key, strtok(line, delim), buff_size - 1);
+	key[buff_size - 1] = '\0';  
+
+	strncpy(value, strtok(NULL, delim), buff_size - 1);
+	value[buff_size - 1] = '\0';	
+
+
 	removespace(key);
 	removespace(value);
 
@@ -47,6 +51,7 @@ init_t tokenize(char *line) {
 
 	return init;
 }
+
 
 
 init_t *configinit(const char *filename, int *count) {
