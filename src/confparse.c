@@ -3,13 +3,20 @@
 
 
 void removespace(char *str) {
-    char *t = str;
-    do {
-        if(*t != ' ') {
-            *str++ = *t;
+	char *src = str, *dest = str; 
+	
+
+	while (*src != '\0') {
+		if (*src != ' ') {
+			*dest = *src;
+			dest++;
+		}
+		src++;
 	}
-    } while(*t++ != '\0');
+
+	*dest = '\0';
 }
+
 
 
 init_t tokenize(char *line) {
