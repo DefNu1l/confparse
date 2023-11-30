@@ -2,11 +2,25 @@
 #define CONFPARSE_H
 
 
+/*
+* confparse - small config file parser library, v1.0.1
+*
+* This is the header file for confparse.c
+*
+* Author: Def0x00
+* License: MIT
+* GitHub Repository: https://github.com/DefNu1l/confparse
+*/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <ctype.h>
 
+
+#define GENBUFF 512
 
 
 struct settings {
@@ -15,6 +29,11 @@ struct settings {
 };
 
 typedef struct settings init_t;
+
+
+
+int countlines(const char *filename);
+void ignorecomment(char *str);
 
 
 void removespace(char *str);
