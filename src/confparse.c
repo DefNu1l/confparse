@@ -146,7 +146,11 @@ static unsigned int issupportedfile(const char *filename) {
 
 
 int configvalidate(const char *filename, unsigned int verbose) {
-	if (verbose == 1) {
+	if (verbose != 1 && verbose != 0) {
+		fprintf(stderr, "FATAL :: Unknown verbose value set\n");
+		exit(-1);
+	}
+	else if (verbose == 1) {
 		printf("Running validation checks for %s..", filename);
 	}
 
