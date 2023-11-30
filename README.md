@@ -1,6 +1,6 @@
 # confparse - Small configuration file parsing library. 
 
-The confparse project facilitates the process of parsing a configuration file into keys and their corresponding values. These pairs can be handled individually, allowing for easy reading of configuration files. Currently, this project supports up to 100 entries.
+The confparse project facilitates the process of parsing a configuration file into keys and their corresponding values. These pairs can be handled individually, allowing for easy reading of configuration files. Currently, this project supports up to 500 entries.
 
 ### Usage
 
