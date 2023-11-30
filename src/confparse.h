@@ -36,6 +36,9 @@ int countlines(const char *filename);
 void ignorecomment(char *str);
 
 
+int configvalidate(const char *filename, unsigned int verbose);
+
+
 void removespace(char *str);
 init_t tokenize(char *line);
 init_t *configinit(const char *filename, int *count);
