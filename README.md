@@ -23,6 +23,36 @@ init_t *configinit(const char *filename, int *count);
 void configcleanup(init_t *storage, int count);
 ```
 
+#### Details:
+`configvalidate`
+
+Description:
+
+The configvalidate function checks the file for required formats like required commenting, size and type.
+
+Return value:
+
+configvalidate will return `-1` on fatal errors, `1` on non fatal issues and `0` if no issues where detected.
+
+`configinit`
+
+Description:
+
+configinit can be used to load the actual config file and also checks for regular issues when `configvalidate` isn't called (BUT IT IS RECOMMENDED!). It is the most important function which will tokenize the entries and perform various handles.
+
+Return value:
+
+On success, configinit returns a pointer to the structure containing the `key` and the `value` of the current entry. If it fails, it will print a message to stderr with a hint to the failure.
+
+
+`configcleanup`
+
+Description:
+
+`configinit` will allocate memory for the current structure and returns a pointer to it. The configcleanup function is used to free the previous allocated memory when there is no need anymore.
+
+
+### Example
 - The keys and their values are managed through an index. Here is an example of how the functions can be used (test.c):
 
 ```C
@@ -31,22 +61,26 @@ void configcleanup(init_t *storage, int count);
 
 int main(void) {
 
-	const char *config_file = "test.txt";
+	const char *config_file = "test.txt"; // Config file
 	
 
-	int check = configvalidate(config_file, 0);
+	int check = configvalidate(config_file, 0); // Run a validation check
 	if (check != 1) {
-		int storage_count;
+		int storage_count; // Number of entries in config_file
+		// Load the config file and tokenize the entries
 		init_t *storage = configinit(config_file, &storage_count);
 
+		// Iterate over the number of entries and extract the current key and value
 		for (int idx = 0; idx < storage_count; idx++) {
 			printf("KEY: %s\nVALUE: %s\n",
 				storage[idx].get_key, storage[idx].get_value);
 		}
 
+		// Free allocated memory by the configinit function
 		configcleanup(storage, storage_count);
 	}
 	else {
+		// Config file validation cannot be approved
 		puts("Check failed");
 		return -1;
 	}
@@ -55,7 +89,11 @@ int main(void) {
 }
 ```
 
-- Note: confparse is currently at the `beginning` of its development.
+#### Note 
+
+confparse is currently at the `beginning` of its development.
+If you encounter any issues or have suggestions for improvements, please feel free to let me know. Your feedback is valuable as we work towards enhancing and refining the functionality of confparse. Thank you for your support!
+
 
 ### License
 
