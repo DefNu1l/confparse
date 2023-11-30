@@ -150,6 +150,22 @@ int configvalidate(const char *filename, unsigned int verbose) {
 			}
 			break;
 		}
+		char *temp = buff;
+		while (*temp) {
+			if (*temp == '\'' 
+				|| (*temp == '/' && *(temp + 1) == '/') 
+				|| (*temp == '/' && *(temp + 1) == '*')) {
+				if (verbose == 1) {
+					fprintf(stderr, "configvalidate :: ERROR :: Only '#' is allowed to mark a comment");
+				}
+				is_failure++;
+				break;
+			}
+			else {
+				temp++;
+			}
+
+		}
 
 
 	}
