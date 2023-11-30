@@ -3,7 +3,7 @@
 
 
 /*
-* confparse - small config file parser library, v1.0.1
+* confparse - small config file parser library, v1.0.2
 *
 * The confparse project facilitates the process of parsing a configuration 
 * file into keys and their corresponding values. These pairs can be handled 
@@ -16,7 +16,7 @@
 */
 
 
-int countlines(const char *filename) {
+static int countlines(const char *filename) {
 	int counter = 0;
 	char buff[GENBUFF];
 
@@ -48,7 +48,7 @@ int countlines(const char *filename) {
 }
 
 
-void removespace(char *str) {
+static void removespace(char *str) {
 	char *src = str, *dest = str; 
 	
 
@@ -64,7 +64,7 @@ void removespace(char *str) {
 }
 
 
-void ignorecomment(char *str) {
+static void ignorecomment(char *str) {
 	char *pos = strchr(str, '#');
 	if (pos != NULL) {
 		*pos = '\0';
@@ -74,7 +74,7 @@ void ignorecomment(char *str) {
 
 
 
-init_t tokenize(char *line) {
+static init_t tokenize(char *line) {
 	size_t buff_size = 32;
 	char key[buff_size], value[buff_size];
 	char *delim = "=";
@@ -118,6 +118,33 @@ init_t tokenize(char *line) {
 }
 
 
+
+static int fileexist(const char *filename) {
+	return access(filename, F_OK);
+}
+
+
+static unsigned int issupportedfile(const char *filename) {
+	const char *exts[] = {".txt", ".conf", ".ini", ".cfg"};
+	const char *ext = strrchr(filename, '.');
+	unsigned int supported = 0;
+
+	if (ext != NULL) {
+		for (int iter = 0; iter < sizeof(exts) / sizeof(exts[0]); iter++) {
+			if (strcmp(ext, exts[iter]) == 0) {
+				supported = 1;
+				break;
+			}
+		}
+
+	}
+
+
+	return supported;
+
+}
+
+
 int configvalidate(const char *filename, unsigned int verbose) {
 	if (verbose == 1) {
 		printf("Running validation checks for %s..", filename);
@@ -126,12 +153,25 @@ int configvalidate(const char *filename, unsigned int verbose) {
 
 	unsigned int is_failure = 0;
 
+	if (fileexist(filename) != 0) {
+		fprintf(stderr, "FATAL :: File %s does not exist\n", filename);
+		exit(-1);
+	} 
+	if (issupportedfile(filename) == 0) {
+		is_failure++;
+		if (verbose == 1) {
+			printf("\nINVALID :: File %s cannot be handled\n", filename);
+			return -1;
+		}
+
+	}
+
+
 	FILE *fp = fopen(filename, "r");
 	if (fp == NULL) {
 		is_failure++;
 		if (verbose == 1) {
-			fprintf(stderr, "configinit :: ERROR :: Unable to open stream for %s\n",
-				filename);
+			printf("\nINVALID :: Unable to open stream for %s\n", filename);
 			return -1;
 		}
 	}
@@ -156,7 +196,7 @@ int configvalidate(const char *filename, unsigned int verbose) {
 				|| (*temp == '/' && *(temp + 1) == '/') 
 				|| (*temp == '/' && *(temp + 1) == '*')) {
 				if (verbose == 1) {
-					fprintf(stderr, "configvalidate :: ERROR :: Only '#' is allowed to mark a comment");
+					printf("\nINVALID :: Only '#' is allowed to mark a comment");
 				}
 				is_failure++;
 				break;
@@ -191,6 +231,18 @@ int configvalidate(const char *filename, unsigned int verbose) {
 
 
 init_t *configinit(const char *filename, int *count) {
+	if (fileexist(filename) != 0) {
+		fprintf(stderr, "configinit :: ERROR :: File %s does not exist\n",
+			filename);
+		exit(-1);
+
+	}
+	if (issupportedfile(filename) == 0) {
+		fprintf(stderr, "configinit :: ERROR :: Filetype not supported: %s\n", 
+			filename);
+		exit(-1);
+
+	}
 	if (countlines(filename) > GENBUFF) {
 		fprintf(stderr, "configinit :: ERROR :: File %s is too large\n",
 			filename);
