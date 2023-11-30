@@ -1,6 +1,7 @@
 #include "confparse.h"
 
 
+
 /*
 * confparse - small config file parser library, v1.0.1
 *
@@ -13,7 +14,6 @@
 * License: MIT
 * GitHub Repository: https://github.com/DefNu1l/confparse
 */
-
 
 
 int countlines(const char *filename) {
@@ -115,6 +115,61 @@ init_t tokenize(char *line) {
 	
 
 	return init;
+}
+
+
+int configvalidate(const char *filename, unsigned int verbose) {
+	if (verbose == 1) {
+		printf("Running validation checks for %s..", filename);
+	}
+
+
+	unsigned int is_failure = 0;
+
+	FILE *fp = fopen(filename, "r");
+	if (fp == NULL) {
+		is_failure++;
+		if (verbose == 1) {
+			fprintf(stderr, "configinit :: ERROR :: Unable to open stream for %s\n",
+				filename);
+			return -1;
+		}
+	}
+	
+	size_t test_buff = GENBUFF + 2;
+	char *buff = NULL;
+	while (getline(&buff, &test_buff, fp) != -1) {
+		size_t line_length = strlen(buff);
+		if (line_length > 0 && buff[line_length - 1] == '\n') {
+			line_length--;
+		}
+		if (line_length > GENBUFF) {
+			is_failure++;
+			if (verbose == 1) {
+				printf("\nINVALID :: This line is too long: %.20s..\n", buff);
+			}
+			break;
+		}
+
+
+	}
+
+	fclose(fp);
+	free(buff);
+
+	if (countlines(filename) > GENBUFF) {
+		is_failure++;
+		if (verbose == 1) {
+			printf("\nINVALID :: Too much entries!\n");
+		}
+	}
+
+	if (verbose == 1 && is_failure == 0) {
+		printf("PASSED\n");
+	}
+
+
+	return is_failure;
 }
 
 
