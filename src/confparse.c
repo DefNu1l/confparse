@@ -1,6 +1,52 @@
 #include "confparse.h"
 
 
+/*
+* confparse - small config file parser library, v1.0.1
+*
+* The confparse project facilitates the process of parsing a configuration 
+* file into keys and their corresponding values. These pairs can be handled 
+* individually, allowing for easy reading of configuration files. Currently, 
+* this project supports up to 500 entries.
+*
+* Author: Def0x00
+* License: MIT
+* GitHub Repository: https://github.com/DefNu1l/confparse
+*/
+
+
+
+int countlines(const char *filename) {
+	int counter = 0;
+	char buff[GENBUFF];
+
+
+	FILE *fp = fopen(filename, "r");
+	if (fp == NULL) {
+		fprintf(stderr, "configinit :: ERROR :: Unable to open stream for %s\n", 
+			filename);
+		exit(-1);
+	}
+
+	
+	while (fgets(buff, GENBUFF, fp) != NULL) {
+		if (buff[strlen(buff) - 1] == '\n') {
+			buff[strlen(buff) - 1] = '\0';
+		}
+		if (strlen(buff) == 0 || buff[0] == '#') {
+			continue;
+		}
+
+		counter++;
+	}
+
+
+	fclose(fp);
+
+	return counter;
+
+}
+
 
 void removespace(char *str) {
 	char *src = str, *dest = str; 
@@ -18,13 +64,21 @@ void removespace(char *str) {
 }
 
 
+void ignorecomment(char *str) {
+	char *pos = strchr(str, '#');
+	if (pos != NULL) {
+		*pos = '\0';
+	}
+
+}
+
+
 
 init_t tokenize(char *line) {
 	size_t buff_size = 32;
 	char key[buff_size], value[buff_size];
 	char *delim = "=";
 
-	
 	strncpy(key, strtok(line, delim), buff_size - 1);
 	key[buff_size - 1] = '\0';  
 
@@ -35,8 +89,12 @@ init_t tokenize(char *line) {
 	removespace(key);
 	removespace(value);
 
+	ignorecomment(key);
+	ignorecomment(value);
+
 	
 	int x = 0, y = 0;
+
 
 	while (value[x]) {
 		if (value[x] != '"') {
@@ -62,6 +120,12 @@ init_t tokenize(char *line) {
 
 
 init_t *configinit(const char *filename, int *count) {
+	if (countlines(filename) > GENBUFF) {
+		fprintf(stderr, "configinit :: ERROR :: File %s is too large\n",
+			filename);
+		exit(-1);
+	}
+
 	FILE *fp = fopen(filename, "r");
 	if (fp == NULL) {
 		fprintf(stderr, "configinit :: ERROR :: Unable to open stream for %s\n", 
@@ -69,10 +133,8 @@ init_t *configinit(const char *filename, int *count) {
 		exit(-1);
 	}
 
-	
-	size_t buff_size = 100;
 
-	init_t *storage = (init_t*)malloc(sizeof(init_t) * buff_size); 
+	init_t *storage = (init_t*)malloc(sizeof(init_t) * GENBUFF); 
 	if (storage == NULL) {
 		fprintf(stderr, "configinit :: ERROR :: malloc: %s\n", strerror(errno));
 		exit(-1);
@@ -81,9 +143,12 @@ init_t *configinit(const char *filename, int *count) {
 
 
 	int storage_count = 0;
-	char buff[buff_size];
+	char buff[GENBUFF];
 
-	while (fgets(buff, buff_size, fp) != NULL) {
+	while (fgets(buff, GENBUFF, fp) != NULL) {
+		if (isspace((unsigned char)*buff) || buff[0] == '#') {
+			continue;
+		}
 		storage[storage_count] = tokenize(buff);
 		storage_count++;
 	}
@@ -103,4 +168,3 @@ void configcleanup(init_t *storage, int count) {
 
 	free(storage);
 }
-
