@@ -3,7 +3,7 @@
 
 
 /*
-* confparse - small config file parser library, v1.0.1
+* confparse - small config file parser library, v1.0.2
 *
 * This is the header file for confparse.c
 *
@@ -18,7 +18,7 @@
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
-
+#include <unistd.h>
 
 #define GENBUFF 512
 
@@ -31,16 +31,7 @@ struct settings {
 typedef struct settings init_t;
 
 
-
-int countlines(const char *filename);
-void ignorecomment(char *str);
-
-
 int configvalidate(const char *filename, unsigned int verbose);
-
-
-void removespace(char *str);
-init_t tokenize(char *line);
 init_t *configinit(const char *filename, int *count);
 void configcleanup(init_t *storage, int count);
 
