@@ -28,21 +28,21 @@ void configcleanup(init_t *storage, int count);
 
 Description:
 
-The configvalidate function checks the file for required formats like required commenting, size and type.
+The configvalidate function checks the file for required formats like commenting, size and type.
 
 Return value:
 
-configvalidate will return `-1` on fatal errors, `1` on non fatal issues and `0` if no issues where detected.
+configvalidate will return `-1` when any check fails and `0` when no issues where detected.
 
 `configinit`
 
 Description:
 
-configinit can be used to load the actual config file and also checks for regular issues when `configvalidate` isn't called (BUT IT IS RECOMMENDED!). It is the most important function which will tokenize the entries and perform various handles.
+configinit can be used to load the actual config file and also checks for some issues when `configvalidate` isn't called (BUT IT IS RECOMMENDED!). It is the most important function which will tokenize the entries and perform various handles.
 
 Return value:
 
-On success, configinit returns a pointer to the structure containing the `key` and the `value` of the current entry. If it fails, it will print a message to stderr with a hint to the failure.
+On success, configinit returns a pointer to an array of structs containing the `key` and the `value` of the current entry. If it fails, it will print a message to stderr with a hint to the failure.
 
 
 `configcleanup`
@@ -64,7 +64,7 @@ int main(void) {
 	const char *config_file = "test.txt"; // Config file
 	
 
-	int check = configvalidate(config_file, 0); // Run a validation check
+	int check = configvalidate(config_file, 1); // Run a validation check
 	if (check != 1) {
 		int storage_count; // Number of entries in config_file
 		// Load the config file and tokenize the entries
