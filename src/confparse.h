@@ -3,7 +3,7 @@
 
 
 /*
-* confparse - small config file parser library, v1.0.2
+* confparse - small config file parser library, v1.0.3
 *
 * This is the header file for confparse.c
 *
@@ -28,13 +28,13 @@ struct settings {
 	char *get_value;
 };
 
-typedef struct settings init_t;
+typedef struct settings config_t;
 
 
 int configvalidate(const char *filename, unsigned int verbose);
-init_t *configinit(const char *filename, int *count);
-void configcleanup(init_t *storage, int count);
-
+config_t *configinit(const char *filename, int *count);
+void configcleanup(config_t *storage, int count);
+char *configgetvalue(config_t *session, const char *entry, int count);
 
 
 #endif
