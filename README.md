@@ -17,10 +17,13 @@ The confparse project facilitates the process of parsing a configuration file in
 int configvalidate(const char *filename, unsigned int verbose);
 
 // Load the config file and define the number of entries
-init_t *configinit(const char *filename, int *count);
+config_t *configinit(const char *filename, int *count);
+
+// Extract the value of a specific key
+char *configgetvalue(config_t *session, const char *entry, int count);
 
 // Free memory allocated by the configinit function
-void configcleanup(init_t *storage, int count);
+void configcleanup(config_t *storage, int count);
 ```
 
 #### Details:
@@ -53,6 +56,23 @@ Return value:
 On success, configinit returns a pointer to an array of structs containing the `key` and the `value` of the current entry. If it fails, it will print a message to stderr with a hint to the failure.
 
 
+`configgetvalue`
+
+Parameters:
+- `session`: pointer to loaded session
+- `entry`: key to get the value from
+- `count`: number of entries (lines)
+
+
+Description:
+
+configgetvalue will query the value in the main array to find the corresponding value. When the entry is found, it will return the value.
+
+Return value:
+
+If the call fails, configgetvalue returns NULL. Otherwise, the value of the specified entry is returned.
+
+
 `configcleanup`
 
 Parameters:
@@ -76,11 +96,11 @@ int main(void) {
 	const char *config_file = "test.txt"; // Config file
 	
 
-	int check = configvalidate(config_file, 1); // Run a validation check
+	int check = configvalidate(config_file, 0); // Run a validation check
 	if (check != 1) {
 		int storage_count; // Number of entries in config_file
 		// Load the config file and tokenize the entries
-		init_t *storage = configinit(config_file, &storage_count);
+		config_t *storage = configinit(config_file, &storage_count);
 
 		// Iterate over the number of entries and extract the current key and value
 		for (int idx = 0; idx < storage_count; idx++) {
@@ -88,20 +108,33 @@ int main(void) {
 				storage[idx].get_key, storage[idx].get_value);
 		}
 
+
+		char *value = configgetvalue(storage, "test", storage_count);
+		if (value == NULL) {
+			// Free allocated memory when configgetvalue does not found the entry
+			configcleanup(storage, storage_count);
+			fprintf(stderr, "Entry not found!\n");
+			return -1;
+		}
+
+
+		printf("%s\n", value);
+
 		// Free allocated memory by the configinit function
 		configcleanup(storage, storage_count);
 	}
 	else {
 		// Config file validation cannot be approved
-		puts("Check failed");
+		fprintf(stderr, "Check failed!\n");
 		return -1;
 	}
 
 	return 0;
 }
+
 ```
 
-- The config file pattern currently allowed is:
+- The config file pattern currently supported is:
 ```
 # Comments can be defined using a hashtag
 # Configurations File for . . . 
