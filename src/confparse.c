@@ -147,51 +147,51 @@ static unsigned int issupportedfile(const char *filename) {
 
 int configvalidate(const char *filename, unsigned int verbose) {
 	if (verbose != 1 && verbose != 0) {
-		fprintf(stderr, "FATAL :: Unknown verbose value set\n");
-		exit(-1);
+		fprintf(stderr, "INVALID :: Unknown verbose value set\n");
+		return -1;
 	}
 	else if (verbose == 1) {
 		printf("Running validation checks for %s..", filename);
 	}
 
 
-	unsigned int is_failure = 0;
-
 	if (fileexist(filename) != 0) {
-		fprintf(stderr, "FATAL :: File %s does not exist\n", filename);
-		exit(-1);
+		if (verbose == 1) {
+			fprintf(stderr, "FATAL :: File %s does not exist\n", filename);
+		}
+		return -1;
 	} 
 	if (issupportedfile(filename) == 0) {
-		is_failure++;
 		if (verbose == 1) {
 			printf("\nINVALID :: File %s cannot be handled\n", filename);
-			return -1;
 		}
+		return -1;
 
 	}
 
 
 	FILE *fp = fopen(filename, "r");
 	if (fp == NULL) {
-		is_failure++;
 		if (verbose == 1) {
 			printf("\nINVALID :: Unable to open stream for %s\n", filename);
-			return -1;
+			
 		}
+		return -1;
 	}
 	
 	size_t test_buff = GENBUFF + 2;
 	char *buff = NULL;
+	size_t err = 0;
 	while (getline(&buff, &test_buff, fp) != -1) {
 		size_t line_length = strlen(buff);
 		if (line_length > 0 && buff[line_length - 1] == '\n') {
 			line_length--;
 		}
 		if (line_length > GENBUFF) {
-			is_failure++;
 			if (verbose == 1) {
 				printf("\nINVALID :: This line is too long: %.20s..\n", buff);
 			}
+			err++;
 			break;
 		}
 		char *temp = buff;
@@ -200,9 +200,9 @@ int configvalidate(const char *filename, unsigned int verbose) {
 				|| (*temp == '/' && *(temp + 1) == '/') 
 				|| (*temp == '/' && *(temp + 1) == '*')) {
 				if (verbose == 1) {
-					printf("\nINVALID :: Only '#' is allowed to mark a comment");
+					printf("\nINVALID :: Only '#' is allowed to mark a comment\n");
 				}
-				is_failure++;
+				err++;
 				break;
 			}
 			else {
@@ -214,22 +214,27 @@ int configvalidate(const char *filename, unsigned int verbose) {
 
 	}
 
+
+	if (err == 1) {
+		return 1;
+	}
+
 	fclose(fp);
 	free(buff);
 
 	if (countlines(filename) > GENBUFF) {
-		is_failure++;
 		if (verbose == 1) {
 			printf("\nINVALID :: Too much entries!\n");
 		}
+		return -1;
 	}
 
-	if (verbose == 1 && is_failure == 0) {
+	if (verbose == 1) {
 		printf("PASSED\n");
 	}
 
 
-	return is_failure;
+	return 0;
 }
 
 
