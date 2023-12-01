@@ -3,7 +3,7 @@
 
 
 /*
-* confparse - small config file parser library, v1.0.2
+* confparse - small config file parser library, v1.0.3
 *
 * The confparse project facilitates the process of parsing a configuration 
 * file into keys and their corresponding values. These pairs can be handled 
@@ -74,7 +74,7 @@ static void ignorecomment(char *str) {
 
 
 
-static init_t tokenize(char *line) {
+static config_t tokenize(char *line) {
 	size_t buff_size = 32;
 	char key[buff_size], value[buff_size];
 	char *delim = "=";
@@ -108,7 +108,7 @@ static init_t tokenize(char *line) {
 	
 	value[y] = '\0';
 
-	init_t init;
+	config_t init;
 	init.get_key = strdup(key);
 	init.get_value = strdup(value);
 
@@ -237,9 +237,32 @@ int configvalidate(const char *filename, unsigned int verbose) {
 	return 0;
 }
 
+char *configgetvalue(config_t *session, const char *entry, int count) {
+	
+	char *value = NULL;
+	int hit = 0;
+
+	for (int iter = 0; iter < count; iter++) {
+		if (strcmp(session[iter].get_key, entry) == 0) {
+			value = session[iter].get_value;
+			hit++;
+			break;
+		}
+	}
 
 
-init_t *configinit(const char *filename, int *count) {
+	if (hit == 0) {
+		return NULL;
+	}
+	
+
+
+	return value;
+}
+
+
+
+config_t *configinit(const char *filename, int *count) {
 	if (fileexist(filename) != 0) {
 		fprintf(stderr, "configinit :: ERROR :: File %s does not exist\n",
 			filename);
@@ -266,7 +289,7 @@ init_t *configinit(const char *filename, int *count) {
 	}
 
 
-	init_t *storage = (init_t*)malloc(sizeof(init_t) * GENBUFF); 
+	config_t *storage = (config_t*)malloc(sizeof(config_t) * GENBUFF); 
 	if (storage == NULL) {
 		fprintf(stderr, "configinit :: ERROR :: malloc: %s\n", strerror(errno));
 		exit(-1);
@@ -292,7 +315,7 @@ init_t *configinit(const char *filename, int *count) {
 	return storage;
 }
 
-void configcleanup(init_t *storage, int count) {
+void configcleanup(config_t *storage, int count) {
 	for (int idx = 0; idx < count; idx++) {
 		free(storage[idx].get_key);
 		free(storage[idx].get_value);
