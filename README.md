@@ -26,6 +26,10 @@ void configcleanup(init_t *storage, int count);
 #### Details:
 `configvalidate`
 
+Parameters:
+- `filename`: config file which needs to be checked
+- `verbose`: verbose mode, 1 to enable messages and 0 to hide
+
 Description:
 
 The configvalidate function checks the file for required formats like commenting, size and type.
@@ -35,6 +39,10 @@ Return value:
 configvalidate will return `-1` when any check fails and `0` when no issues where detected.
 
 `configinit`
+
+Parameters:
+- `filename`: config file to load
+- `count`: number of entries (lines) set in `filename`
 
 Description:
 
@@ -47,9 +55,13 @@ On success, configinit returns a pointer to an array of structs containing the `
 
 `configcleanup`
 
+Parameters:
+- `storage`: pointer to the previous defined array of structs
+- `count`: expected number of entries (lines) for iterate to free  
+
 Description:
 
-`configinit` will allocate memory for the current structure and returns a pointer to it. The configcleanup function is used to free the previous allocated memory when there is no need anymore.
+`configinit` will allocate memory for the current structure and returns a pointer to it. This `needs to be freed` and the configcleanup function is used to free the previous allocated memory when there is no need anymore.
 
 
 ### Example
@@ -89,9 +101,21 @@ int main(void) {
 }
 ```
 
+- The config file pattern currently allowed is:
+```
+# Comments can be defined using a hashtag
+# Configurations File for . . . 
+# Description . . .
+# Last edited . . . 
+
+ip = "127.0.0.1" # ip address set to localhost
+port = 5003 # standard port 
+dns="8.8.8.8" # spaces does not matter 
+```
+
 #### Note 
 
-confparse is currently at the `beginning` of its development.
+confparse is in its early stages of development.
 If you encounter any issues or have suggestions for improvements, please feel free to let me know. Your feedback is valuable as we work towards enhancing and refining the functionality of confparse. Thank you for your support!
 
 
